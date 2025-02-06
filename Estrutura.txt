@@ -1,0 +1,20 @@
+Transformei um programa em python desktop para um programa web com esta estrutura
+/projeto web
+
+projeto_web/
+|-- /data
+|   |-- topicos_estudo.txt
+|   |-- topicos_musica.txt
+|   |-- pesos.json
+|   |-- progresso.json
+├── templates/
+│   ├── index.html
+│   ├── topicos.html
+│   ├── musica.html
+│   ├── configuracoes.html  # <-- Novo arquivo aqui
+|-- /static/css
+|          |-- style.css
+|-- /static/js
+|          |-- script.js
+├── app.py
+├── ControleDeEstudos.py

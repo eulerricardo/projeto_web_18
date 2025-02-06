@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tópicos de Estudo</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        #topico-atual {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .negrito {
+            font-weight: bold;
+        }
+        .verde {
+            color: green;
+        }
+        .button {
+            display: inline-block;
+            margin: 10px 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            text-align: center;
+            background-color: green;
+            color: white;
+        }
+        .link {
+            margin-top: 20px;
+            display: inline-block;
+            color: purple;
+            text-decoration: none;
+        }
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tópicos de Estudo</h1>
+    <p id="topico-atual">
+        <span class="negrito">Próximo Tópico:</span> 
+        <span class="verde">Carregando...</span>
+    </p>
+
+    <div>
+        <button class="button" onclick="avancarTopico()">Avançar Tópico</button>
+        <button class="button" onclick="concluirTopico()">Concluir Tópico</button>
+    </div>
+
+    <a href="/" class="link">Voltar ao Menu</a>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>

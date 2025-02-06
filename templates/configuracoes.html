@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações</title>
+</head>
+<body>
+    <h1>Configurações</h1>
+    <form id="configuracoes-form" onsubmit="salvarConfiguracoes(); return false;">
+        <label for="modo_estudo">Modo de Estudo:</label>
+        <select id="modo_estudo" name="modo_estudo">
+            <option value="sequencial" {% if modo_estudo == "sequencial" %}selected{% endif %}>Sequencial</option>
+            <option value="randomizado" {% if modo_estudo == "randomizado" %}selected{% endif %} selected>Randomizado</option>
+        </select>
+        
+        <button type="submit">Salvar</button>
+    </form>
+
+    <script>
+        // Função para salvar as configurações do modo de estudo
+        function salvarConfiguracoes() {
+            const selectElement = document.getElementById("modo_estudo");
+            const novoModo = selectElement.value;
+
+            // Envia a configuração ao servidor
+            fetch("/configuracoes", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ modo_estudo: novoModo })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.mensagem) {
+                    alert(data.mensagem); // Exibe mensagem de sucesso
+                } else if (data.erro) {
+                    alert(data.erro); // Exibe mensagem de erro
+                }
+            })
+            .catch(error => {
+                console.error("Erro ao salvar as configurações:", error);
+                alert("Erro ao salvar as configurações. Por favor, tente novamente.");
+            });
+        }
+    </script>
+</body>
+</html>

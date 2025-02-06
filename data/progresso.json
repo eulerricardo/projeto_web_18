@@ -1,0 +1,16 @@
+{
+    "estado_atual": {
+        "topico_atual": null,
+        "progressao_atual": null,
+        "modo_estudo": "randomizado"
+    },
+    "historico": [],
+    "progresso_topicos": {
+        "2.1.11.Categorias_Gramaticais_Invariaveis::Preposição": true,
+        "Abacate": true
+    },
+    "progresso_topicos_musica": {
+        "4.1.1.1.3.Aula_Alirio_1": false,
+        "Borbota": false
+    }
+}

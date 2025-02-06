@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Estudos</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .checkbox {
+            margin: 10px 0;
+        }
+        .button {
+            display: inline-block;
+            margin: 10px 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .button-topicos {
+            background-color: #8B4513;
+            color: white;
+        }
+        .button-musica {
+            background-color: green;
+            color: white;
+        }
+        .button-controle-pesos {
+            background-color: blue;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Menu Principal</h1>
+    <div class="checkbox">
+        <input type="checkbox" id="modo-randomizado" onclick="toggleModoRandomizado()" 
+               {% if modo_estudo == 'randomizado' %}checked{% endif %}>
+        <label for="modo-randomizado">Modo Randomizado</label>
+    </div>
+    <!-- Linha 1: Tópicos de Estudo e Tópicos de Música -->
+    <div class="row">
+        <button class="button button-topicos" onclick="irParaTopicos()">Tópicos de Estudo</button>
+        <button class="button button-musica" onclick="irParaMusica()">Tópicos de Música</button>
+    </div>
+    <!-- Linha 2: Controle de Pesos -->
+    <div class="row">
+        <button class="button button-controle-pesos" onclick="controlePesos()">Controle de Pesos</button>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
