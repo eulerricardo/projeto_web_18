@@ -4,6 +4,7 @@ import logging
 from flask import Flask, render_template, jsonify, request, send_from_directory
 import json
 from ControleDeEstudos import ControleDeEstudos
+from datetime import datetime
 import requests
 from requests.exceptions import HTTPError, ConnectionError
 
@@ -330,63 +331,59 @@ def remover_topico():
 
 @app.route('/concluir_topico', methods=['POST'])
 def concluir_topico():
-    """Conclui o tópico atual ou verifica se todos foram concluídos."""
-    try:
-        controle.concluir_topico()
-        proximo_topico = controle.topico_atual
-        return jsonify({
-            "mensagem": "Tópico concluído com sucesso.",
-            "proximo_topico": proximo_topico
-        }), 200
-    except Exception as e:
-        return jsonify({
-            "erro": f"Erro ao concluir o tópico: {str(e)}"
-        }), 500
+    if not controle.topico_atual:
+        return jsonify({"mensagem": "Erro: Nenhum tópico atual para concluir."}), 400
 
-@app.route('/concluir_topico_musica', methods=['POST'])
-def concluir_topico_musica():
-    """Conclui o tópico musical atual ou verifica se todos foram concluídos."""
-    try:
-        controle.concluir_topico_musica()
-        proximo_topico = controle.topico_musica_atual
-        return jsonify({
-            "mensagem": "Tópico musical concluído com sucesso.",
-            "proximo_topico": proximo_topico
-        }), 200
-    except Exception as e:
-        return jsonify({
-            "erro": f"Erro ao concluir o tópico musical: {str(e)}"
-        }), 500
+    controle.log["progresso_topicos"][controle.topico_atual] = True
+    controle.log["historico"].append({
+        "data_hora": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "acao": "Tópico concluído",
+        "topico": controle.topico_atual,
+    })
+    controle.salvar_log()
+
+    if all(controle.log["progresso_topicos"].values()):
+        mensagem = "Todos os tópicos foram concluídos! Reiniciando progresso..."
+        for key in controle.log["progresso_topicos"].keys():
+            controle.log["progresso_topicos"][key] = False
+        controle.topico_atual = None
+        return jsonify({"mensagem": mensagem, "proximo_topico": None, "reiniciar": True}), 200
+    else:
+        controle.avancar_topico()
+        mensagem = f"Novo tópico selecionado: {controle.topico_atual}"
+        controle.salvar_log()
+        return jsonify({"mensagem": mensagem, "proximo_topico": controle.topico_atual, "reiniciar": False}), 200
 
 @app.route('/avancar_topico', methods=['POST'])
 def avancar_topico():
-    """Avança para o próximo tópico disponível ou informa se todos foram concluídos."""
+    controle.avancar_topico()
+    if controle.topico_atual:
+        mensagem = f"Novo tópico selecionado: {controle.topico_atual}"
+        return jsonify({"mensagem": mensagem, "proximo_topico": controle.topico_atual}), 200
+    else:
+        return jsonify({"mensagem": "Erro ao avançar o tópico. Tente novamente.", "proximo_topico": None}), 400
+
+@app.route('/concluir_topico_musica', methods=['POST'])
+def concluir_topico_musica():
     try:
-        controle.avancar_topico()
-        proximo_topico = controle.topico_atual
-        return jsonify({
-            "mensagem": "Tópico avançado com sucesso.",
-            "proximo_topico": proximo_topico
-        }), 200
-    except Exception as e:
-        return jsonify({
-            "erro": f"Erro ao avançar o tópico: {str(e)}"
-        }), 500
+        controle.concluir_topico_musica()
+        mensagem = "Tópico musical concluído com sucesso!"
+        if controle.topico_musica_atual:
+            mensagem += f" Novo tópico musical selecionado: {controle.topico_musica_atual}"
+        return jsonify({"mensagem": mensagem, "proximo_topico": controle.topico_musica_atual}), 200
+    except ValueError as e:
+        return jsonify({"mensagem": str(e)}), 400
 
 @app.route('/avancar_topico_musica', methods=['POST'])
 def avancar_topico_musica():
-    """Avança para o próximo tópico de música disponível ou informa se todos foram concluídos."""
-    try:
-        controle.avancar_topico_musica()
-        proximo_topico = controle.topico_musica_atual
-        return jsonify({
-            "mensagem": "Tópico musical avançado com sucesso.",
-            "proximo_topico": proximo_topico
-        }), 200
-    except Exception as e:
-        return jsonify({
-            "erro": f"Erro ao avançar o tópico musical: {str(e)}"
-        }), 500
+    controle.avancar_topico_musica()
+    if controle.topico_musica_atual:
+        mensagem = f"Novo tópico musical selecionado: {controle.topico_musica_atual}"
+        return jsonify({"mensagem": mensagem, "proximo_topico": controle.topico_musica_atual}), 200
+    else:
+        return jsonify({"mensagem": "Erro ao avançar o tópico musical. Tente novamente.", "proximo_topico": None}), 400
+
+
 
 @app.route('/configuracoes', methods=['GET', 'POST'])
 def configuracoes():
@@ -450,7 +447,6 @@ def topico_musica_atual():
     except Exception as e:
         print(f"Erro: {str(e)}")
         return jsonify({"erro": f"Erro ao carregar tópico de música: {str(e)}"}), 500
-
     
 @app.route('/topicos_musica')
 def topicos_musica():

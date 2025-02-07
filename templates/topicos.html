@@ -39,6 +39,10 @@
             background-color: green;
             color: white;
         }
+        .button:disabled {
+            background-color: #d3d3d3;
+            cursor: not-allowed;
+        }
         .link {
             margin-top: 20px;
             display: inline-block;
@@ -48,6 +52,8 @@
         .link:hover {
             text-decoration: underline;
         }
+        .mensagem.success { background-color: green; color: white; padding: 10px; margin: 5px; }
+        .mensagem.error { background-color: red; color: white; padding: 10px; margin: 5px; }
     </style>
 </head>
 <body>
@@ -64,6 +70,7 @@
 
     <a href="/" class="link">Voltar ao Menu</a>
 
+    <div id="mensagem-container"></div>
     <script src="/static/js/script.js"></script>
 </body>
 </html>

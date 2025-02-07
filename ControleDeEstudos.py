@@ -39,6 +39,7 @@ class ControleDeEstudos:
 
         # Estado atual
         self.topico_atual = self.log.get("estado_atual", {}).get("topico_atual", None)
+        self.topico_musica_atual = self.log.get("estado_atual", {}).get("topico_musica_atual", None)
         self.progresso_atual = self.log.get("estado_atual", {}).get("progressao_atual", None)
         self.modo_estudo = self.log.get("estado_atual", {}).get("modo_estudo", "sequencial")
 
@@ -56,6 +57,8 @@ class ControleDeEstudos:
 
         if not self.topicos_musicais:
             print("Aviso: Nenhum tópico musical encontrado. Verifique o arquivo 'topicos_musica.txt'.")
+        elif not self.topico_musica_atual:
+            self.avancar_topico_musica()
 
         # Salvar o log atualizado
         self.salvar_log()
@@ -84,6 +87,7 @@ class ControleDeEstudos:
         log_padrao = {
             "estado_atual": {
                 "topico_atual": None,
+                "topico_musica_atual": None,
                 "progressao_atual": None,
                 "modo_estudo": "randomizado",  # Define randomizado como padrão
             },
@@ -170,7 +174,6 @@ class ControleDeEstudos:
         else:
             self.topico_atual = topicos_pendentes[0]
 
-        self.log["progresso_topicos"][self.topico_atual] = True
         self.salvar_log()
         print(f"Novo tópico selecionado: {self.topico_atual}")
 
@@ -215,14 +218,14 @@ class ControleDeEstudos:
         else:
             self.topico_musica_atual = topicos_pendentes[0]
 
-        self.log["progresso_topicos_musica"][self.topico_musica_atual] = True
         self.salvar_log()
         print(f"Novo tópico musical selecionado: {self.topico_musica_atual}")
 
     def concluir_topico_musica(self):
         """Marca o tópico musical atual como concluído e avança para o próximo."""
         if not self.topico_musica_atual:
-            raise ValueError("Nenhum tópico musical atual para concluir.")
+            print("Erro: Nenhum tópico musical atual para concluir.")
+            return
 
         self.log["progresso_topicos_musica"][self.topico_musica_atual] = True
         self.log["historico"].append({
@@ -233,17 +236,18 @@ class ControleDeEstudos:
         self.salvar_log()
 
         if all(self.log["progresso_topicos_musica"].values()):
-            print("Todos os tópicos musicais foram concluídos!")
+            print("Todos os tópicos musicais foram concluídos! Reiniciando progresso...")
+            for key in self.log["progresso_topicos_musica"].keys():
+                self.log["progresso_topicos_musica"][key] = False
             self.topico_musica_atual = None
         else:
             self.avancar_topico_musica()
 
-def obter_topico_musica_atual(self):
-    """Retorna o primeiro tópico musical pendente ou o último registrado."""
-    if not self.topicos_musicais:
-        return None
-    return next((t for t, status in self.log["progresso_topicos_musica"].items() if not status), None) or self.topicos_musicais[-1]
-
+    def obter_topico_musica_atual(self):
+        """Retorna o primeiro tópico musical pendente ou o último registrado."""
+        if not self.topicos_musicais:
+            return None
+        return next((t for t, status in self.log["progresso_topicos_musica"].items() if not status), None) or self.topicos_musicais[-1]
 
     def atualizar_modo_estudo(self, novo_modo):
         if novo_modo not in ["sequencial", "randomizado"]:
@@ -264,7 +268,8 @@ def obter_topico_musica_atual(self):
             print(f"Pesos salvos com sucesso em: {self.arquivo_pesos}")
         except Exception as e:
             print(f"Erro ao salvar os pesos {self.arquivo_pesos}: {e}")
-            
+
+    @staticmethod
     def processar_tags():
         try:
             response = requests.get('http://127.0.0.1:8765/')
