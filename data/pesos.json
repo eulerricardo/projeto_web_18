@@ -1,22 +1,9 @@
 {
     "estudo": {
-        "1.1.Versiculo": {
-            "peso": 5,
+        "Preposição": {
+            "peso": 3,
             "adicionado": "lista"
-        },
-        "Abacate": {
-            "peso": 5,
-            "adicionado": "manual"
         }
     },
-    "musica": {
-        "4.5.1.Conceitos": {
-            "peso": 9,
-            "adicionado": "lista"
-        },
-        "Borbota": {
-            "peso": 8,
-            "adicionado": "manual"
-        }
-    }
+    "musica": {}
 }

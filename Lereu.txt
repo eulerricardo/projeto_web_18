@@ -1,3 +1,37 @@
+Estou fazendo outra abordagem.. Preciso que o controle de Estudos registre diferente o progresso. pra que ele seja quantificados de acordo com o que foi definidos em peso.
+
+##Funções
+salvar_log => é o responsável por alimentar o progresso.json
+carregar_log  => crio o progresso.json
+
+vamos lá tudo começa nos jsons: progresso e peso puxa aí pra ver
+existem dois grandes grupos  independentes: estudo e musica, ok?
+
+pronto.. então o objetivo é ver os topicos de cada grupo de acordo com os pesos. se o peso do tópico é 5 vejo ele 5 vezes pra que o tópico seja concluido. no caso do grupo musica
+{
+    "estudo": {
+        "1.1.Versiculo": {
+            "peso": 5,
+            "adicionado": "lista"
+        },
+        "Abacate": {
+            "peso": 5,
+            "adicionado": "manual"
+        }
+
+preciso ver o  1.1.Versiculo = 5 vezes e o Abacate = 5 vezes. Daí ele reinicia a contagem, entendeu?
+
+Os tópicos de cada grupo (estudo e música) sejam exibidos de acordo com os pesos especificados no arquivo JSON. Cada tópico deve ser exibido o número de vezes correspondente ao seu peso, e depois a contagem deve reiniciar.
+
+Está tudo funcionando maravilhamente bem no backend.
+porém o front end não reage. Ele deveria, a cada final de ciclo de conclusão, inabilitar o botão "Concluir Tópico" e apresentar uma mensagem: Todos os tópicos foram concluídos! Acione "Avançar Tópico" para reiniciarmos o progresso..
+
+Isto não está acontecendo no front end, porém no back end a mensagem aparece.
+Parece que o problema está na comunicação entre o backend e o frontend ou na lógica do frontend para desativar o botão "Concluir Tópico" e exibir a mensagem apropriada.
+
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 Quando eu entro em http://127.0.0.1:5000/topicos_musica, o sistema me apresenta o último tópico que  vi e que está no topicos_musica.txt. Da mesma forma deveria acontecer quando entro no http://127.0.0.1:5000/topicos_estudo, o sistema deveria me apresentar o último tópico que  vi e que está no topicos_estudo.txt, porém isto não está acontecendo. As funcionalidades são similares, o que muda é o tipo de arquivo que elas acessam
 
 

@@ -39,14 +39,15 @@ class ControleDeEstudos:
 
         # Estado atual
         self.topico_atual = self.log.get("estado_atual", {}).get("topico_atual", None)
+        self.topico_musica_atual = self.log.get("estado_atual", {}).get("topico_musica_atual", None)
         self.progresso_atual = self.log.get("estado_atual", {}).get("progressao_atual", None)
         self.modo_estudo = self.log.get("estado_atual", {}).get("modo_estudo", "sequencial")
 
         # Garantir que as chaves necessárias estejam no log
         if "progresso_topicos" not in self.log:
-            self.log["progresso_topicos"] = {topico: False for topico in self.topicos}
+            self.log["progresso_topicos"] = {topico: 0 for topico in self.topicos}
         if "progresso_topicos_musica" not in self.log:
-            self.log["progresso_topicos_musica"] = {topico: False for topico in self.topicos_musicais}
+            self.log["progresso_topicos_musica"] = {topico: 0 for topico in self.topicos_musicais}
 
         # Verificar estado inicial e avançar o tópico se necessário
         if not self.topicos:
@@ -84,15 +85,16 @@ class ControleDeEstudos:
         log_padrao = {
             "estado_atual": {
                 "topico_atual": None,
+                "topico_musica_atual": None,
                 "progressao_atual": None,
                 "modo_estudo": "randomizado",  # Define randomizado como padrão
             },
             "historico": [],
             "progresso_topicos": {
-                topico: False for topico in self.topicos
+                topico: 0 for topico in self.topicos
             },
             "progresso_topicos_musica": {
-                topico: False for topico in self.topicos_musicais
+                topico: 0 for topico in self.topicos_musicais
             },
         }
 
@@ -106,9 +108,9 @@ class ControleDeEstudos:
                 log = json.load(arquivo)
 
             if "progresso_topicos" not in log:
-                log["progresso_topicos"] = {topico: False for topico in self.topicos}
+                log["progresso_topicos"] = {topico: 0 for topico in self.topicos}
             if "progresso_topicos_musica" not in log:
-                log["progresso_topicos_musica"] = {topico: False for topico in self.topicos_musicais}
+                log["progresso_topicos_musica"] = {topico: 0 for topico in self.topicos_musicais}
 
             with open(self.arquivo_log, "w", encoding="utf-8") as arquivo:
                 json.dump(log, arquivo, ensure_ascii=False, indent=4)
@@ -153,12 +155,12 @@ class ControleDeEstudos:
 
     def avancar_topico(self):
         """Avança para o próximo tópico disponível ou informa se todos foram concluídos."""
-        if all(self.log["progresso_topicos"].values()):
+        if all(progress == 100 for progress in self.log["progresso_topicos"].values()):
             print("Todos os tópicos foram concluídos! Reiniciando progresso...")
             for key in self.log["progresso_topicos"].keys():
-                self.log["progresso_topicos"][key] = False
+                self.log["progresso_topicos"][key] = 0
 
-        topicos_pendentes = [t for t, status in self.log["progresso_topicos"].items() if not status]
+        topicos_pendentes = [t for t, progress in self.log["progresso_topicos"].items() if progress < 100]
 
         if not topicos_pendentes:
             print("Nenhum tópico disponível para seleção. Todos os tópicos foram concluídos.")
@@ -170,7 +172,7 @@ class ControleDeEstudos:
         else:
             self.topico_atual = topicos_pendentes[0]
 
-        self.log["progresso_topicos"][self.topico_atual] = True
+        self.log["progresso_topicos"][self.topico_atual] = 100
         self.salvar_log()
         print(f"Novo tópico selecionado: {self.topico_atual}")
 
@@ -180,7 +182,7 @@ class ControleDeEstudos:
             print("Erro: Nenhum tópico atual para concluir.")
             return
 
-        self.log["progresso_topicos"][self.topico_atual] = True
+        self.log["progresso_topicos"][self.topico_atual] = 100
         self.log["historico"].append({
             "data_hora": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "acao": "Tópico concluído",
@@ -188,22 +190,22 @@ class ControleDeEstudos:
         })
         self.salvar_log()
 
-        if all(self.log["progresso_topicos"].values()):
+        if all(progress == 100 for progress in self.log["progresso_topicos"].values()):
             print("Todos os tópicos foram concluídos! Reiniciando progresso...")
             for key in self.log["progresso_topicos"].keys():
-                self.log["progresso_topicos"][key] = False
+                self.log["progresso_topicos"][key] = 0
             self.topico_atual = None
         else:
             self.avancar_topico()
 
     def avancar_topico_musica(self):
         """Avança para o próximo tópico de música disponível ou informa se todos foram concluídos."""
-        if all(self.log["progresso_topicos_musica"].values()):
+        if all(progress == 100 for progress in self.log["progresso_topicos_musica"].values()):
             print("Todos os tópicos de música foram concluídos! Reiniciando progresso...")
             for key in self.log["progresso_topicos_musica"].keys():
-                self.log["progresso_topicos_musica"][key] = False
+                self.log["progresso_topicos_musica"][key] = 0
 
-        topicos_pendentes = [t for t, status in self.log["progresso_topicos_musica"].items() if not status]
+        topicos_pendentes = [t for t, progress in self.log["progresso_topicos_musica"].items() if progress < 100]
 
         if not topicos_pendentes:
             print("Nenhum tópico de música disponível para seleção. Todos os tópicos foram concluídos.")
@@ -215,7 +217,7 @@ class ControleDeEstudos:
         else:
             self.topico_musica_atual = topicos_pendentes[0]
 
-        self.log["progresso_topicos_musica"][self.topico_musica_atual] = True
+        self.log["progresso_topicos_musica"][self.topico_musica_atual] = 100
         self.salvar_log()
         print(f"Novo tópico musical selecionado: {self.topico_musica_atual}")
 
@@ -224,7 +226,7 @@ class ControleDeEstudos:
         if not self.topico_musica_atual:
             raise ValueError("Nenhum tópico musical atual para concluir.")
 
-        self.log["progresso_topicos_musica"][self.topico_musica_atual] = True
+        self.log["progresso_topicos_musica"][self.topico_musica_atual] = 100
         self.log["historico"].append({
             "data_hora": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "acao": "Tópico musical concluído",
@@ -232,18 +234,17 @@ class ControleDeEstudos:
         })
         self.salvar_log()
 
-        if all(self.log["progresso_topicos_musica"].values()):
+        if all(progress == 100 for progress in self.log["progresso_topicos_musica"].values()):
             print("Todos os tópicos musicais foram concluídos!")
             self.topico_musica_atual = None
         else:
             self.avancar_topico_musica()
 
-def obter_topico_musica_atual(self):
-    """Retorna o primeiro tópico musical pendente ou o último registrado."""
-    if not self.topicos_musicais:
-        return None
-    return next((t for t, status in self.log["progresso_topicos_musica"].items() if not status), None) or self.topicos_musicais[-1]
-
+    def obter_topico_musica_atual(self):
+        """Retorna o primeiro tópico musical pendente ou o último registrado."""
+        if not self.topicos_musicais:
+            return None
+        return next((t for t, progress in self.log["progresso_topicos_musica"].items() if progress < 100), None) or self.topicos_musicais[-1]
 
     def atualizar_modo_estudo(self, novo_modo):
         if novo_modo not in ["sequencial", "randomizado"]:
@@ -264,7 +265,7 @@ def obter_topico_musica_atual(self):
             print(f"Pesos salvos com sucesso em: {self.arquivo_pesos}")
         except Exception as e:
             print(f"Erro ao salvar os pesos {self.arquivo_pesos}: {e}")
-            
+
     def processar_tags():
         try:
             response = requests.get('http://127.0.0.1:8765/')
