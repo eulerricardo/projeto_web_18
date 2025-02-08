@@ -285,6 +285,50 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Erro no carregamento dos dados:", error);
         });
 
+    const botaoConcluirTopico = document.getElementById('botaoConcluirTopico');
+    const topicoAtualElemento = document.getElementById('topicoAtual');
+    const topicoAtual = topicoAtualElemento ? topicoAtualElemento.textContent : null;
+
+    function atualizarBotaoConcluir() {
+        if (topicoAtual) {
+            fetch(`/verificar_progresso/${topicoAtual}`)
+                .then(response => response.json())
+                .then(data => {
+                    const { limite, progresso_atual } = data;
+                    if (progresso_atual < limite) {
+                        botaoConcluirTopico.disabled = false;
+                    } else {
+                        botaoConcluirTopico.disabled = true;
+                    }
+                })
+                .catch(error => {
+                    console.error("Erro ao verificar o progresso do tópico:", error);
+                });
+        }
+    }
+
+    if (botaoConcluirTopico) {
+        botaoConcluirTopico.addEventListener('click', function() {
+            // Lógica para concluir o tópico
+            fetch("/concluir_topico", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ topico: topicoAtual })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    atualizarBotaoConcluir();
+                }
+            })
+            .catch(error => {
+                console.error("Erro ao concluir o tópico:", error);
+            });
+        });
+    }
+
     // Carregar o tópico atual sem avançar ao carregar a página
     if (window.location.pathname === '/topicos_estudo') {
         fetch("/topico_atual")
@@ -292,6 +336,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(data => {
                 if (data.topico_atual) {
                     document.getElementById("topico-atual").innerHTML = `<span class="negrito">Próximo Tópico:</span> <span class="negrito verde">${data.topico_atual}</span>`;
+                    atualizarBotaoConcluir();
                 } else {
                     document.getElementById("topico-atual").innerHTML = `<span class="negrito">Próximo Tópico:</span> <span class="negrito verde">Nenhum tópico carregado.</span>`;
                 }
@@ -305,6 +350,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(data => {
                 if (data.topico_musica_atual) {
                     document.getElementById("topico-atual").innerHTML = `<span class="negrito">Próximo Tópico:</span> <span class="negrito verde">${data.topico_musica_atual}</span>`;
+                    atualizarBotaoConcluir();
                 } else {
                     document.getElementById("topico-atual").innerHTML = `<span class="negrito">Próximo Tópico:</span> <span class="negrito verde">Nenhum tópico carregado.</span>`;
                 }
@@ -364,3 +410,11 @@ function preencherTabela(tabelaId, dados) {
         tbody.appendChild(linha);
     });
 }
+
+
+
+
+
+
+
+

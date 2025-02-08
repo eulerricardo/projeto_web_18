@@ -390,7 +390,6 @@ def avancar_topico_musica():
         return jsonify({"mensagem": "Erro ao avançar o tópico musical. Tente novamente.", "proximo_topico": None}), 400
 
 
-
 @app.route('/configuracoes', methods=['GET', 'POST'])
 def configuracoes():
     """Exibe e atualiza configurações."""
@@ -480,6 +479,12 @@ def topicos_estudo():
 def static_files(filename):
     """Serve arquivos estáticos."""
     return send_from_directory('projeto_web/static/js', filename)
+
+@app.route('/verificar_progresso/<topico>', methods=['GET'])
+def verificar_progresso(topico):
+    limite = controle.pesos["estudo"].get(topico, {}).get("peso", 1)
+    progresso_atual = controle.log["progresso_topicos"].get(topico, 0)
+    return jsonify({'limite': limite, 'progresso_atual': progresso_atual})
 
 if __name__ == '__main__':
     app.run(debug=True)
