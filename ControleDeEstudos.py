@@ -155,18 +155,13 @@ class ControleDeEstudos:
             print("Erro: Nenhum tópico musical atual para concluir.")
             return
 
-        self.log["progresso_topicos_musica"][self.topico_musica_atual] = True
-        self.log["historico"].append({
-            "data_hora": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "acao": "Tópico musical concluído",
-            "topico": self.topico_musica_atual,
-        })
+        self.log["progresso_topicos_musica"][self.topico_musica_atual] = 0
         self.salvar_log()
 
-        if all(self.log["progresso_topicos_musica"].values()):
+        if all(value == 0 for value in self.log["progresso_topicos_musica"].values()):
             print("Todos os tópicos musicais foram concluídos! Reiniciando progresso...")
             for key in self.log["progresso_topicos_musica"].keys():
-                self.log["progresso_topicos_musica"][key] = False
+                self.log["progresso_topicos_musica"][key] = 0
             self.topico_musica_atual = None
         else:
             self.avancar_topico_musica()
@@ -231,23 +226,15 @@ class ControleDeEstudos:
         progresso_atual = self.log["progresso_topicos"][self.topico_atual]
         limite = self.pesos["estudo"].get(self.topico_atual, {}).get("peso", 1)
 
-        self.log["historico"].append({
-            "data_hora": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "acao": "Tópico concluído",
-            "topico": self.topico_atual,
-        })
-
         # Verificar se o progresso atingiu o limite
         if progresso_atual >= limite:
-            self.log["progresso_topicos"][self.topico_atual] = True
+            self.log["progresso_topicos"][self.topico_atual] = 0
             print(f"Tópico {self.topico_atual} concluído definitivamente.")
-        else:
-            self.log["progresso_topicos"][self.topico_atual] = False
-
+        
         # Salvar o log
         self.salvar_log()
 
-        todos_concluidos = all(isinstance(value, bool) and value for value in self.log["progresso_topicos"].values())
+        todos_concluidos = all(value == 0 for value in self.log["progresso_topicos"].values())
         if todos_concluidos:
             print("Todos os tópicos foram concluídos! Reiniciando progresso...")
             for key in self.log["progresso_topicos"].keys():
@@ -257,6 +244,7 @@ class ControleDeEstudos:
             self.avancar_topico()
 
         return {"todos_concluidos": todos_concluidos, "progresso_atual": progresso_atual, "limite": limite}
+
 
     def avancar_topico(self):
         """Avança para o próximo tópico disponível ou informa se todos foram concluídos."""
@@ -327,30 +315,6 @@ class ControleDeEstudos:
                     json.dump(log_padrao, arquivo, ensure_ascii=False, indent=4)
                 return log_padrao
 
-     # Função que verifica o que foi concluido com o peso.json
-
-    def progresso_completo(self, topico):
-        """Verifica se o progresso do tópico atingiu o valor necessário."""
-        peso_necessario = self.pesos.get('estudo', {}).get(topico, {}).get('peso', 0)
-        progresso_atual = self.log["progresso_topicos"].get(topico, 0)
-        return progresso_atual >= peso_necessario
- 
-     # Função Alterada: salvar_log
-  
-    def salvar_log(self):
-        """Salva o progresso no arquivo de log."""
-        try:
-            # Remove informações desnecessárias do estado atual se estiverem com valor None
-            self.log["estado_atual"] = {key: value for key, value in self.log["estado_atual"].items() if value is not None}
-
-            # Imprime o conteúdo do log antes de salvar
-            print("Conteúdo do log a ser salvo em salvar_log:", json.dumps(self.log, indent=4, ensure_ascii=False))
-            
-            with open(self.arquivo_log, "w", encoding="utf-8") as log_file:
-                json.dump(self.log, log_file, indent=4, ensure_ascii=False)
-            print(f"Log salvo com sucesso em: {self.arquivo_log}")
-        except Exception as e:
-            print(f"Erro ao salvar o log {self.arquivo_log}: {e}")
 
      # Função Alterada: carregar_log
   
@@ -399,6 +363,27 @@ class ControleDeEstudos:
             with open(self.arquivo_log, "w", encoding="utf-8") as arquivo:
                 json.dump(log_padrão, arquivo, ensure_ascii=False, indent=4)
             return log_padrão
+        
+    def salvar_log(self):
+        """Salva o progresso no arquivo de log."""
+        try:
+            # Remove informações desnecessárias do estado atual se estiverem com valor None
+            self.log["estado_atual"] = {key: value for key, value in self.log["estado_atual"].items() if value is not None}
+
+            # Imprime o conteúdo do log antes de salvar
+            print("Conteúdo do log a ser salvo em salvar_log:", json.dumps(self.log, indent=4, ensure_ascii=False))
+            
+            with open(self.arquivo_log, "w", encoding="utf-8") as log_file:
+                json.dump(self.log, log_file, indent=4, ensure_ascii=False)
+            print(f"Log salvo com sucesso em: {self.arquivo_log}")
+        except Exception as e:
+            print(f"Erro ao salvar o log {self.arquivo_log}: {e}")
+            
+    def progresso_completo(self, topico):
+        """Verifica se o progresso do tópico atingiu o valor necessário."""
+        peso_necessario = self.pesos.get('estudo', {}).get(topico, {}).get('peso', 0)
+        progresso_atual = self.log["progresso_topicos"].get(topico, 0)
+        return progresso_atual >= peso_necessario
 
 if __name__ == "__main__":
     print("Iniciando Controle de Estudos...")

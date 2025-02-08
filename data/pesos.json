@@ -3,6 +3,10 @@
         "Abacate": {
             "peso": 3,
             "adicionado": "lista"
+        },
+        "Abobora": {
+            "peso": 2,
+            "adicionado": "manual"
         }
     },
     "musica": {}

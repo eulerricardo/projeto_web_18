@@ -352,13 +352,15 @@ def concluir_topico():
         proximo_topico = controle.topico_atual
         return jsonify({
             "mensagem": "Tópico concluído com sucesso.",
-            "proximo_topico": proximo_topico
+            "proximo_topico": proximo_topico,
+            "reiniciar": not proximo_topico
         }), 200
     except Exception as e:
         return jsonify({
             "erro": f"Erro ao concluir o tópico: {str(e)}"
         }), 500
-    
+
+
 @app.route('/avancar_topico', methods=['POST'])
 def avancar_topico():
     controle.avancar_topico()
