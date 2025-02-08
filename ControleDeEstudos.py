@@ -215,17 +215,21 @@ class ControleDeEstudos:
 
      # Função Alterada: concluir_topico
    
+
     def concluir_topico(self):
-        """Marca o tópico atual como concluído e avança para o próximo tópico."""
+        """Marca o tópico atual como concluído e avança para o próximo tópico, retornando se todos foram concluídos."""
         if not self.topico_atual:
             print("Erro: Nenhum tópico atual para concluir.")
-            return
+            return {"todos_concluidos": False, "progresso_atual": 0, "limite": 0}
 
         # Incrementar o progresso do tópico atual
         if self.topico_atual in self.log["progresso_topicos"]:
             self.log["progresso_topicos"][self.topico_atual] += 1
         else:
             self.log["progresso_topicos"][self.topico_atual] = 1
+
+        progresso_atual = self.log["progresso_topicos"][self.topico_atual]
+        limite = self.pesos["estudo"].get(self.topico_atual, {}).get("peso", 1)
 
         self.log["historico"].append({
             "data_hora": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -234,20 +238,17 @@ class ControleDeEstudos:
         })
 
         # Verificar se o progresso atingiu o limite
-        limite = self.pesos["estudo"].get(self.topico_atual, {}).get("peso", 1)
-        if self.log["progresso_topicos"][self.topico_atual] >= limite:
+        if progresso_atual >= limite:
             self.log["progresso_topicos"][self.topico_atual] = True
             print(f"Tópico {self.topico_atual} concluído definitivamente.")
         else:
             self.log["progresso_topicos"][self.topico_atual] = False
 
-        # Apresenta no terminal o valor do log antes de salvar
-        print("Log antes de salvar em concluir_topico:", json.dumps(self.log, indent=4, ensure_ascii=False))
-
-        # Este comando grava o estado atualizado no arquivo progresso.json
+        # Salvar o log
         self.salvar_log()
 
-        if all(isinstance(value, bool) and value for value in self.log["progresso_topicos"].values()):
+        todos_concluidos = all(isinstance(value, bool) and value for value in self.log["progresso_topicos"].values())
+        if todos_concluidos:
             print("Todos os tópicos foram concluídos! Reiniciando progresso...")
             for key in self.log["progresso_topicos"].keys():
                 self.log["progresso_topicos"][key] = 0
@@ -255,6 +256,7 @@ class ControleDeEstudos:
         else:
             self.avancar_topico()
 
+        return {"todos_concluidos": todos_concluidos, "progresso_atual": progresso_atual, "limite": limite}
 
     def avancar_topico(self):
         """Avança para o próximo tópico disponível ou informa se todos foram concluídos."""

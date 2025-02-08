@@ -1,12 +1,61 @@
 body {
     font-family: Arial, sans-serif;
-    margin: 20px;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
     background-color: #f8f9fa;
 }
 
 h1, h2 {
     text-align: center;
     margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+#topico-atual {
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+.negrito {
+    font-weight: bold;
+}
+
+.verde {
+    color: green;
+}
+
+.button {
+    display: inline-block;
+    margin: 10px 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: center;
+    background-color: green;
+    color: white;
+}
+
+.button:disabled {
+    background-color: #d3d3d3;
+    cursor: not-allowed;
+}
+
+.link {
+    margin-top: 20px;
+    display: inline-block;
+    color: purple;
+    text-decoration: none;
+}
+
+.link:hover {
+    text-decoration: underline;
 }
 
 /* Estilos do Modal */
@@ -26,7 +75,6 @@ h1, h2 {
     max-height: 70%;
     overflow: hidden;
 }
-
 
 #modal h2 {
     text-align: center;

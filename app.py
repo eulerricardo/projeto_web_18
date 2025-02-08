@@ -485,6 +485,11 @@ def verificar_progresso(topico):
     progresso_atual = controle.log["progresso_topicos"].get(topico, 0)
     return jsonify({'limite': limite, 'progresso_atual': progresso_atual})
 
+@app.route('/verificar_estado_botao', methods=['GET'])
+def verificar_estado_botao():
+    todos_concluidos = all(isinstance(value, bool) and value for value in controle.log["progresso_topicos"].values())
+    return jsonify({"todos_concluidos": todos_concluidos})
+
 if __name__ == '__main__':
     app.run(debug=True)
 

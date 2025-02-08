@@ -1,3 +1,4 @@
+botão concluir não está ficando desabilitado quando chega no limite do tópico. Colocar um debug
 
 
 Estou fazendo outra abordagem.. Preciso que o controle de Estudos registre diferente o progresso. pra que ele seja quantificados de acordo com o que foi definidos em peso.
