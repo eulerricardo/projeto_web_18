@@ -4,7 +4,7 @@ projeto_web_18/
 |-- /data
 |   |-- topicos_estudo.txt
 |   |-- topicos_musica.txt
-|   |-- pesos.json    <== Vamos analisar aqui
+|   |-- pesos.json   
 |   |-- progresso.json  <== Vamos analisar aqui
 ├── templates/
 │   ├── index.html
@@ -16,4 +16,4 @@ projeto_web_18/
 |-- /static/js
 |          |-- script.js
 ├── app.py
-├── ControleDeEstudos.py  <== Vamos analisar aqui
+├── ControleDeEstudos.py 
