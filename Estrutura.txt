@@ -9,7 +9,7 @@ projeto_web_18/
 ├── templates/
 │   ├── index.html
 │   ├── topicos.html  <== Vamos analisar aqui
-│   ├── musica.html    <== Vamos analisar aqui
+│   ├── musica.html   
 │   ├── configuracoes.html  
 |-- /static/css
 |          |-- style.css

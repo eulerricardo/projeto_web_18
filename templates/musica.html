@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tópicos de Música</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/script.js"></script> <!-- Carregar script.js primeiro -->
 </head>
 <body>
     <h1>Tópicos de Música</h1>
@@ -21,8 +22,6 @@
     <a href="/" class="link">Voltar ao Menu</a>
 
     <div id="mensagem-container"></div>
-    <script src="/static/js/script.js"></script>
-
     <script>
         const concluirTopicoMusica = async () => {
             const response = await fetch('/concluir_topico_musica', {
@@ -32,7 +31,7 @@
                 }
             });
             const data = await response.json();
-            if (data.proximo_topico === null) {
+            if (data.progresso_atual >= data.limite) {
                 document.getElementById('concluir-topico').disabled = true;
             }
         };
