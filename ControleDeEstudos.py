@@ -82,56 +82,6 @@ class ControleDeEstudos:
             print("Arquivo de pesos não encontrado ou inválido. Usando valores padrão.")
             return {"estudo": {}, "musica": {}}
 
-    def carregar_log(self):
-        """Carrega o log de progresso do arquivo JSON ou cria um log padrão."""
-        log_padrao = {
-            "estado_atual": {
-                "topico_atual": None,
-                "topico_musica_atual": None,
-                "progressao_atual": None,
-                "modo_estudo": "randomizado",  # Define randomizado como padrão
-            },
-            "historico": [],
-            "progresso_topicos": {
-                topico: False for topico in self.topicos
-            },
-            "progresso_topicos_musica": {
-                topico: False for topico in self.topicos_musicais
-            },
-        }
-
-        if not os.path.exists(self.arquivo_log):
-            with open(self.arquivo_log, "w", encoding="utf-8") as arquivo:
-                json.dump(log_padrao, arquivo, ensure_ascii=False, indent=4)
-            return log_padrao
-
-        try:
-            with open(self.arquivo_log, "r", encoding="utf-8") as arquivo:
-                log = json.load(arquivo)
-
-            if "progresso_topicos" not in log:
-                log["progresso_topicos"] = {topico: False for topico in self.topicos}
-            if "progresso_topicos_musica" not in log:
-                log["progresso_topicos_musica"] = {topico: False for topico in self.topicos_musicais}
-
-            with open(self.arquivo_log, "w", encoding="utf-8") as arquivo:
-                json.dump(log, arquivo, ensure_ascii=False, indent=4)
-
-            return log
-        except json.JSONDecodeError:
-            with open(self.arquivo_log, "w", encoding="utf-8") as arquivo:
-                json.dump(log_padrao, arquivo, ensure_ascii=False, indent=4)
-            return log_padrao
-
-    def salvar_log(self):
-        """Salva o progresso no arquivo de log."""
-        try:
-            with open(self.arquivo_log, "w", encoding="utf-8") as log_file:
-                json.dump(self.log, log_file, indent=4, ensure_ascii=False)
-            print(f"Log salvo com sucesso em: {self.arquivo_log}")
-        except Exception as e:
-            print(f"Erro ao salvar o log {self.arquivo_log}: {e}")
-
     def sincronizar_topicos(self, dados_pesos):
         """Sincroniza os tópicos dos dados_pesos com os arquivos .txt correspondentes."""
         try:
@@ -176,28 +126,6 @@ class ControleDeEstudos:
 
         self.salvar_log()
         print(f"Novo tópico selecionado: {self.topico_atual}")
-
-    def concluir_topico(self):
-        """Marca o tópico atual como concluído e avança para o próximo tópico."""
-        if not self.topico_atual:
-            print("Erro: Nenhum tópico atual para concluir.")
-            return
-
-        self.log["progresso_topicos"][self.topico_atual] = True
-        self.log["historico"].append({
-            "data_hora": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "acao": "Tópico concluído",
-            "topico": self.topico_atual,
-        })
-        self.salvar_log()
-
-        if all(self.log["progresso_topicos"].values()):
-            print("Todos os tópicos foram concluídos! Reiniciando progresso...")
-            for key in self.log["progresso_topicos"].keys():
-                self.log["progresso_topicos"][key] = False
-            self.topico_atual = None
-        else:
-            self.avancar_topico()
 
     def avancar_topico_musica(self):
         """Avança para o próximo tópico de música disponível ou informa se todos foram concluídos."""
@@ -284,8 +212,121 @@ class ControleDeEstudos:
             print(f'Other error occurred: {err}')  # Other errors
         return None
 
+
+     # Função Alterada: concluir_topico
+    def concluir_topico(self):
+        """Marca o tópico atual como concluído e avança para o próximo tópico."""
+        if not self.topico_atual:
+            print("Erro: Nenhum tópico atual para concluir.")
+            return
+
+        if not self.progresso_completo(self.topico_atual):
+            print("Erro: Progresso insuficiente para concluir o tópico.")
+            return
+
+        # Incrementa o valor do progresso do tópico atual
+        if self.topico_atual in self.log["progresso_topicos"]:
+            self.log["progresso_topicos"][self.topico_atual] += 1
+        else:
+            self.log["progresso_topicos"][self.topico_atual] = 1
+
+        self.log["historico"].append({
+            "data_hora": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "acao": "Tópico concluído",
+            "topico": self.topico_atual,
+        })
+        
+        # Apresenta no terminal o valor do log antes de salvar
+        print("Log antes de salvar em concluir_topico:", json.dumps(self.log, indent=4, ensure_ascii=False))
+
+        # Este comando grava o estado atualizado no arquivo progresso.json
+        self.salvar_log()
+
+        if all(value > 0 for value in self.log["progresso_topicos"].values()):
+            print("Todos os tópicos foram concluídos! Reiniciando progresso...")
+            for key in self.log["progresso_topicos"].keys():
+                self.log["progresso_topicos"][key] = 0
+            self.topico_atual = None
+        else:
+            self.avancar_topico()
+
+
+     # Função que verifica o que foi concluido com o peso.json
+    def progresso_completo(self, topico):
+        """Verifica se o progresso do tópico atingiu o valor necessário."""
+        peso_necessario = self.pesos.get('estudo', {}).get(topico, {}).get('peso', 0)
+        progresso_atual = self.log["progresso_topicos"].get(topico, 0)
+        return progresso_atual >= peso_necessario
+ 
+     # Função Alterada: salvar_log
+    def salvar_log(self):
+        """Salva o progresso no arquivo de log."""
+        try:
+            # Remove informações desnecessárias do estado atual se estiverem com valor None
+            self.log["estado_atual"] = {key: value for key, value in self.log["estado_atual"].items() if value is not None}
+
+            # Imprime o conteúdo do log antes de salvar
+            print("Conteúdo do log a ser salvo em salvar_log:", json.dumps(self.log, indent=4, ensure_ascii=False))
+            
+            with open(self.arquivo_log, "w", encoding="utf-8") as log_file:
+                json.dump(self.log, log_file, indent=4, ensure_ascii=False)
+            print(f"Log salvo com sucesso em: {self.arquivo_log}")
+        except Exception as e:
+            print(f"Erro ao salvar o log {self.arquivo_log}: {e}")
+
+     # Função Alterada: carregar_log
+    def carregar_log(self):
+        """Carrega o log de progresso do arquivo JSON ou cria um log padrão."""
+        log_padrão = {
+            "estado_atual": {
+                "modo_estudo": "randomizado",
+            },
+            "historico": [],
+            "progresso_topicos": {
+                topico: 0 for topico in self.topicos
+            },
+            "progresso_topicos_musica": {
+                topico: 0 for topico in self.topicos_musicais
+            },
+        }
+
+        if not os.path.exists(self.arquivo_log):
+            with open(self.arquivo_log, "w", encoding="utf-8") as arquivo:
+                json.dump(log_padrão, arquivo, ensure_ascii=False, indent=4)
+            return log_padrão
+
+        try:
+            with open(self.arquivo_log, "r", encoding="utf-8") as arquivo:
+                log = json.load(arquivo)
+
+            if "progresso_topicos" not in log:
+                log["progresso_topicos"] = {topico: 0 for topico in self.topicos}
+            if "progresso_topicos_musica" not in log:
+                log["progresso_topicos_musica"] = {topico: 0 for topico in self.topicos_musicais}
+
+            # Interagir com pesos.json para garantir que o progresso seja iniciado com 0
+            for categoria, topicos in self.pesos.items():
+                for topico in topicos:
+                    if topico not in log["progresso_topicos"]:
+                        log["progresso_topicos"][topico] = 0
+
+            print("Log carregado em carregar_log:", json.dumps(log, indent=4, ensure_ascii=False))
+
+            with open(self.arquivo_log, "w", encoding="utf-8") as arquivo:
+                json.dump(log, arquivo, ensure_ascii=False, indent=4)
+
+            return log
+        except json.JSONDecodeError:
+            with open(self.arquivo_log, "w", encoding="utf-8") as arquivo:
+                json.dump(log_padrão, arquivo, ensure_ascii=False, indent=4)
+            return log_padrão
+
 if __name__ == "__main__":
     print("Iniciando Controle de Estudos...")
     controle = ControleDeEstudos()
     print("Pesos carregados:")
     print(json.dumps(controle.pesos, indent=4, ensure_ascii=False))
+    
+    # Teste a função concluir_topico diretamente
+    controle.topico_atual = "Abacate"  # Defina um tópico atual para testar
+    controle.concluir_topico()

@@ -1,5 +1,4 @@
-Transformei um programa em python desktop para um programa web com esta estrutura
-/projeto web
+##Minha Estrutura##
 
 projeto_web_18/
 |-- /data

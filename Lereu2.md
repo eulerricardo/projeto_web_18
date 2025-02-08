@@ -1,0 +1,2 @@
+- [x] Trocar a estrutura do progresso.json tem que ser números e não true
+-

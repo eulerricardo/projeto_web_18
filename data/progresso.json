@@ -1,16 +1,13 @@
 {
     "estado_atual": {
-        "topico_atual": null,
-        "topico_musica_atual": null,
-        "progressao_atual": null,
         "modo_estudo": "randomizado"
     },
     "historico": [],
     "progresso_topicos": {
-        "Abacate": false
+        "Abacate": 0
     },
     "progresso_topicos_musica": {
-        "4.1.1.1.3.Aula_Alirio_1": false,
-        "Borbota": false
+        "4.1.1.1.3.Aula_Alirio_1": 0,
+        "Borbota": 0
     }
 }
