@@ -141,6 +141,7 @@ function criarContainerMensagem() {
     return container;
 }
 
+
 // Função para concluir tópico de estudo
 function concluirTopico() {
     console.log('Função concluirTopico foi chamada');
@@ -163,6 +164,7 @@ function concluirTopico() {
             exibirMensagem('Erro ao concluir o tópico. Tente novamente.', 'error');
         });
 }
+
 
 // Função para avançar tópico de estudo
 function avancarTopico() {

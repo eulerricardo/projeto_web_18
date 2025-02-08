@@ -331,35 +331,34 @@ def remover_topico():
 
 @app.route('/concluir_topico', methods=['POST'])
 def concluir_topico():
-    if not controle.topico_atual:
-        return jsonify({"mensagem": "Erro: Nenhum tópico atual para concluir."}), 400
+    """Conclui o tópico atual ou verifica se todos foram concluídos."""
+    try:
+        # Obter o tópico atual e valor do progresso
+        topico_atual = controle.topico_atual
+        progresso_topico = controle.log["progresso_topicos"].get(topico_atual, 0)
+        peso_topico = controle.pesos["estudo"].get(topico_atual, {}).get("peso", 1)
 
-    # Incrementa o valor do progresso do tópico atual
-    if controle.topico_atual in controle.log["progresso_topicos"]:
-        controle.log["progresso_topicos"][controle.topico_atual] += 1
-    else:
-        controle.log["progresso_topicos"][controle.topico_atual] = 1
+        # Verificar se o progresso alcançou o peso definido
+        if progresso_topico < peso_topico:
+            controle.log["progresso_topicos"][topico_atual] += 1  # Incrementar o progresso
+            controle.salvar_log()  # Salvar o log atualizado
+            return jsonify({
+                "mensagem": "O tópico atual ainda não atingiu o peso necessário.",
+                "proximo_topico": topico_atual,
+                "reiniciar": False
+            }), 200
 
-    controle.log["historico"].append({
-        "data_hora": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "acao": "Tópico concluído",
-        "topico": controle.topico_atual,
-    })
-    controle.salvar_log()
-
-    if all(value > 0 for value in controle.log["progresso_topicos"].values()):
-        mensagem = "Todos os tópicos foram concluídos! Reiniciando progresso..."
-        for key in controle.log["progresso_topicos"].keys():
-            controle.log["progresso_topicos"][key] = 0
-        controle.topico_atual = None
-        return jsonify({"mensagem": mensagem, "proximo_topico": None, "reiniciar": True}), 200
-    else:
-        controle.avancar_topico()
-        mensagem = f"Novo tópico selecionado: {controle.topico_atual}"
-        controle.salvar_log()
-        return jsonify({"mensagem": mensagem, "proximo_topico": controle.topico_atual, "reiniciar": False}), 200
+        controle.concluir_topico()
+        proximo_topico = controle.topico_atual
+        return jsonify({
+            "mensagem": "Tópico concluído com sucesso.",
+            "proximo_topico": proximo_topico
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "erro": f"Erro ao concluir o tópico: {str(e)}"
+        }), 500
     
-
 @app.route('/avancar_topico', methods=['POST'])
 def avancar_topico():
     controle.avancar_topico()
