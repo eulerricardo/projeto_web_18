@@ -7,9 +7,10 @@ from ControleDeEstudos import ControleDeEstudos
 from datetime import datetime
 import requests
 from requests.exceptions import HTTPError, ConnectionError
+import logging
 
 # Configuração de logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Adicionar o diretório atual ao sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -329,67 +330,6 @@ def remover_topico():
     except Exception as e:
         return jsonify({"erro": f"Erro ao remover o tópico: {str(e)}"}), 500
 
-@app.route('/concluir_topico', methods=['POST'])
-def concluir_topico():
-    """Conclui o tópico atual ou verifica se todos foram concluídos."""
-    try:
-        # Obter o tópico atual e valor do progresso
-        topico_atual = controle.topico_atual
-        progresso_topico = controle.log["progresso_topicos"].get(topico_atual, 0)
-        peso_topico = controle.pesos["estudo"].get(topico_atual, {}).get("peso", 1)
-
-        # Verificar se o progresso alcançou o peso definido
-        if progresso_topico < peso_topico:
-            controle.log["progresso_topicos"][topico_atual] += 1  # Incrementar o progresso
-            controle.salvar_log()  # Salvar o log atualizado
-            return jsonify({
-                "mensagem": "O tópico atual ainda não atingiu o peso necessário.",
-                "proximo_topico": topico_atual,
-                "reiniciar": False
-            }), 200
-
-        controle.concluir_topico()
-        proximo_topico = controle.topico_atual
-        return jsonify({
-            "mensagem": "Tópico concluído com sucesso.",
-            "proximo_topico": proximo_topico,
-            "reiniciar": not proximo_topico
-        }), 200
-    except Exception as e:
-        return jsonify({
-            "erro": f"Erro ao concluir o tópico: {str(e)}"
-        }), 500
-
-
-@app.route('/avancar_topico', methods=['POST'])
-def avancar_topico():
-    controle.avancar_topico()
-    if controle.topico_atual:
-        mensagem = f"Novo tópico selecionado: {controle.topico_atual}"
-        return jsonify({"mensagem": mensagem, "proximo_topico": controle.topico_atual}), 200
-    else:
-        return jsonify({"mensagem": "Erro ao avançar o tópico. Tente novamente.", "proximo_topico": None}), 400
-
-@app.route('/concluir_topico_musica', methods=['POST'])
-def concluir_topico_musica():
-    try:
-        controle.concluir_topico_musica()
-        mensagem = "Tópico musical concluído com sucesso!"
-        if controle.topico_musica_atual:
-            mensagem += f" Novo tópico musical selecionado: {controle.topico_musica_atual}"
-        return jsonify({"mensagem": mensagem, "proximo_topico": controle.topico_musica_atual}), 200
-    except ValueError as e:
-        return jsonify({"mensagem": str(e)}), 400
-
-@app.route('/avancar_topico_musica', methods=['POST'])
-def avancar_topico_musica():
-    controle.avancar_topico_musica()
-    if controle.topico_musica_atual:
-        mensagem = f"Novo tópico musical selecionado: {controle.topico_musica_atual}"
-        return jsonify({"mensagem": mensagem, "proximo_topico": controle.topico_musica_atual}), 200
-    else:
-        return jsonify({"mensagem": "Erro ao avançar o tópico musical. Tente novamente.", "proximo_topico": None}), 400
-
 
 @app.route('/configuracoes', methods=['GET', 'POST'])
 def configuracoes():
@@ -492,7 +432,73 @@ def verificar_estado_botao():
     todos_concluidos = all(isinstance(value, bool) and value for value in controle.log["progresso_topicos"].values())
     return jsonify({"todos_concluidos": todos_concluidos})
 
+@app.route('/concluir_topico_musica', methods=['POST'])
+def concluir_topico_musica():
+    """Conclui o tópico musical atual ou verifica se todos foram concluídos."""
+    try:
+        controle.concluir_topico_musica()
+        mensagem = "Tópico musical concluído com sucesso!"
+        if controle.topico_musica_atual:
+            mensagem += f" Novo tópico musical selecionado: {controle.topico_musica_atual}"
+        return jsonify({"mensagem": mensagem, "proximo_topico": controle.topico_musica_atual}), 200
+    except ValueError as e:
+        return jsonify({"mensagem": str(e)}), 400
+
+@app.route('/avancar_topico', methods=['POST'])
+def avancar_topico():
+    controle.avancar_topico()
+    if controle.topico_atual:
+        mensagem = f"Novo tópico selecionado: {controle.topico_atual}"
+        return jsonify({"mensagem": mensagem, "proximo_topico": controle.topico_atual}), 200
+    else:
+        return jsonify({"mensagem": "Erro ao avançar o tópico. Tente novamente.", "proximo_topico": None}), 400
+
+@app.route('/avancar_topico_musica', methods=['POST'])
+def avancar_topico_musica():
+    controle.avancar_topico_musica()
+    if controle.topico_musica_atual:
+        mensagem = f"Novo tópico musical selecionado: {controle.topico_musica_atual}"
+        return jsonify({"mensagem": mensagem, "proximo_topico": controle.topico_musica_atual}), 200
+    else:
+        return jsonify({"mensagem": "Erro ao avançar o tópico musical. Tente novamente.", "proximo_topico": None}), 400
+
+@app.route('/concluir_topico', methods=['POST'])
+def concluir_topico():
+    """Conclui o tópico atual ou verifica se todos foram concluídos."""
+    try:
+        # Obter o tópico atual e valor do progresso
+        topico_atual = controle.topico_atual
+        progresso_topico = controle.log["progresso_topicos"].get(topico_atual, 0)
+        peso_topico = controle.pesos["estudo"].get(topico_atual, {}).get("peso", 1)
+
+        logging.debug(f"Concluindo tópico {topico_atual} com progresso {progresso_topico}/{peso_topico}")
+
+        # Verificar se o progresso alcançou o peso definido
+        if progresso_topico < peso_topico:
+            controle.log["progresso_topicos"][topico_atual] += 1  # Incrementar o progresso
+            controle.salvar_log()  # Salvar o log atualizado
+            logging.debug(f"Tópico {topico_atual} ainda não atingiu o peso necessário.")
+            return jsonify({
+                "mensagem": "O tópico atual ainda não atingiu o peso necessário.",
+                "proximo_topico": topico_atual,
+                "reiniciar": False
+            }), 200
+
+        resultado = controle.concluir_topico()
+        proximo_topico = controle.topico_atual
+        logging.debug(f"Tópico {topico_atual} concluído. Próximo tópico: {proximo_topico}")
+        return jsonify({
+            "mensagem": "Tópico concluído com sucesso.",
+            "proximo_topico": proximo_topico,
+            "reiniciar": not proximo_topico
+        }), 200
+    except Exception as e:
+        logging.error(f"Erro ao concluir o tópico: {str(e)}")
+        return jsonify({
+            "erro": f"Erro ao concluir o tópico: {str(e)}"
+        }), 500
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
-
-

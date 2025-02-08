@@ -5,56 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tópicos de Música</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-        }
-        h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        #topico-atual {
-            font-size: 16px;
-            margin: 10px 0;
-        }
-        .negrito {
-            font-weight: bold;
-        }
-        .verde {
-            color: green;
-        }
-        .button {
-            display: inline-block;
-            margin: 10px 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-            text-align: center;
-            background-color: green;
-            color: white;
-        }
-        .button:disabled {
-            background-color: #d3d3d3;
-            cursor: not-allowed;
-        }
-        .link {
-            margin-top: 20px;
-            display: inline-block;
-            color: purple;
-            text-decoration: none;
-        }
-        .link:hover {
-            text-decoration: underline;
-        }
-        .mensagem.success { background-color: green; color: white; padding: 10px; margin: 5px; }
-        .mensagem.error { background-color: red; color: white; padding: 10px; margin: 5px; }
-    </style>
 </head>
 <body>
     <h1>Tópicos de Música</h1>
@@ -65,12 +15,44 @@
 
     <div>
         <button class="button" onclick="avancarTopicoMusica()">Avançar Tópico</button>
-        <button class="button" onclick="concluirTopicoMusica()">Concluir Tópico</button>
+        <button class="button" id="concluir-topico" onclick="concluirTopicoMusica()">Concluir Tópico</button>
     </div>
 
     <a href="/" class="link">Voltar ao Menu</a>
 
     <div id="mensagem-container"></div>
     <script src="/static/js/script.js"></script>
+
+    <script>
+        const concluirTopicoMusica = async () => {
+            const response = await fetch('/concluir_topico_musica', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+            if (data.proximo_topico === null) {
+                document.getElementById('concluir-topico').disabled = true;
+            }
+        };
+
+        // Função para verificar o estado inicial do botão
+        const verificarEstadoBotaoMusica = async () => {
+            const response = await fetch('/verificar_estado_botao', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+            if (data.todos_concluidos) {
+                document.getElementById('concluir-topico').disabled = true;
+            }
+        };
+
+        // Verificação inicial
+        verificarEstadoBotaoMusica();
+    </script>
 </body>
 </html>

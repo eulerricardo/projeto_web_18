@@ -69,28 +69,6 @@ function salvarNovoTopico() {
         });
 }
 
-// Função para concluir tópico de música
-function concluirTopicoMusica() {
-    console.log('Função concluirTopicoMusica foi chamada');
-    fetch("/concluir_topico_musica", { method: "POST" })
-        .then(response => response.json())
-        .then(data => {
-            if (data.proximo_topico !== null) {
-                document.getElementById("topico-atual").innerHTML = `<span class="negrito">Próximo Tópico:</span> <span class="negrito verde">${data.proximo_topico}</span>`;
-            }
-            if (data.proximo_topico === null) {
-                const botaoConcluir = document.querySelector("button[onclick='concluirTopicoMusica()']");
-                botaoConcluir.disabled = true;
-                botaoConcluir.style.backgroundColor = '#d3d3d3';
-                botaoConcluir.style.cursor = 'not-allowed';
-            }
-            exibirMensagem(data.mensagem, 'success');
-        })
-        .catch(error => {
-            console.error("Erro ao concluir o tópico musical:", error);
-            exibirMensagem('Erro ao concluir o tópico musical. Tente novamente.', 'error');
-        });
-}
 
 // Função para avançar tópico de música
 function avancarTopicoMusica() {
@@ -141,29 +119,6 @@ function criarContainerMensagem() {
     return container;
 }
 
-
-// Função para concluir tópico de estudo
-function concluirTopico() {
-    console.log('Função concluirTopico foi chamada');
-    fetch("/concluir_topico", { method: "POST" })
-        .then(response => response.json())
-        .then(data => {
-            if (data.proximo_topico !== null) {
-                document.getElementById("topico-atual").innerHTML = `<span class="negrito">Próximo Tópico:</span> <span class="negrito verde">${data.proximo_topico}</span>`;
-            }
-            if (data.reiniciar) {
-                const botaoConcluir = document.querySelector("button[onclick='concluirTopico()']");
-                botaoConcluir.disabled = true;
-                botaoConcluir.style.backgroundColor = '#d3d3d3';
-                botaoConcluir.style.cursor = 'not-allowed';
-            }
-            exibirMensagem(data.mensagem, 'success');
-        })
-        .catch(error => {
-            console.error("Erro ao concluir o tópico:", error);
-            exibirMensagem('Erro ao concluir o tópico. Tente novamente.', 'error');
-        });
-}
 
 
 // Função para avançar tópico de estudo
@@ -413,7 +368,51 @@ function preencherTabela(tabelaId, dados) {
     });
 }
 
+// Função para concluir tópico de estudo
+function concluirTopico() {
+    console.log('Função concluirTopico foi chamada');
+    fetch("/concluir_topico", { method: "POST" })
+        .then(response => response.json())
+        .then(data => {
+            if (data.proximo_topico !== null) {
+                document.getElementById("topico-atual").innerHTML = `<span class="negrito">Próximo Tópico:</span> <span class="negrito verde">${data.proximo_topico}</span>`;
+            }
+            if (data.todos_concluidos) {
+                const botaoConcluir = document.querySelector("button[onclick='concluirTopico()']");
+                botaoConcluir.disabled = true;
+                botaoConcluir.style.backgroundColor = '#d3d3d3';
+                botaoConcluir.style.cursor = 'not-allowed';
+            }
+            exibirMensagem(data.mensagem, 'success');
+        })
+        .catch(error => {
+            console.error("Erro ao concluir o tópico:", error);
+            exibirMensagem('Erro ao concluir o tópico. Tente novamente.', 'error');
+        });
+}
 
+// Função para concluir tópico de música
+function concluirTopicoMusica() {
+    console.log('Função concluirTopicoMusica foi chamada');
+    fetch("/concluir_topico_musica", { method: "POST" })
+        .then(response => response.json())
+        .then(data => {
+            if (data.proximo_topico !== null) {
+                document.getElementById("topico-atual").innerHTML = `<span class="negrito">Próximo Tópico:</span> <span class="negrito verde">${data.proximo_topico}</span>`;
+            }
+            if (data.todos_concluidos) {
+                const botaoConcluir = document.querySelector("button[onclick='concluirTopicoMusica()']");
+                botaoConcluir.disabled = true;
+                botaoConcluir.style.backgroundColor = '#d3d3d3';
+                botaoConcluir.style.cursor = 'not-allowed';
+            }
+            exibirMensagem(data.mensagem, 'success');
+        })
+        .catch(error => {
+            console.error("Erro ao concluir o tópico musical:", error);
+            exibirMensagem('Erro ao concluir o tópico musical. Tente novamente.', 'error');
+        });
+}
 
 
 

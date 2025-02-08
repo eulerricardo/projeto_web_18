@@ -9,5 +9,10 @@
             "adicionado": "manual"
         }
     },
-    "musica": {}
+    "musica": {
+        "Borbota": {
+            "peso": 3,
+            "adicionado": "lista"
+        }
+    }
 }

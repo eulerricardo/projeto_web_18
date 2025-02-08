@@ -4,16 +4,16 @@ projeto_web_18/
 |-- /data
 |   |-- topicos_estudo.txt
 |   |-- topicos_musica.txt
-|   |-- pesos.json   
+|   |-- pesos.json   <== Vamos analisar aqui
 |   |-- progresso.json  <== Vamos analisar aqui
 ├── templates/
 │   ├── index.html
-│   ├── topicos.html
-│   ├── musica.html
+│   ├── topicos.html  <== Vamos analisar aqui
+│   ├── musica.html    <== Vamos analisar aqui
 │   ├── configuracoes.html  
 |-- /static/css
 |          |-- style.css
 |-- /static/js
-|          |-- script.js
-├── app.py
-├── ControleDeEstudos.py 
+|          |-- script.js  <== Vamos analisar aqui
+├── app.py    <== Vamos analisar aqui/
+├── ControleDeEstudos.py   <== Vamos analisar aqui
